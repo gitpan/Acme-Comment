@@ -5,7 +5,7 @@ use Filter::Simple;
 
 BEGIN {
     use vars qw($VERSION);
-    $VERSION    =   '1.01';
+    $VERSION    =   '1.02';
 }
 
 my $TypeCount = 0;
@@ -59,7 +59,7 @@ my $Conf;
             start       => quotemeta '!\\',
             end         => quotemeta '\!',
             one_line    => 0,
-            single      => '!(?!\\\\)', 
+            single      => '!(?!\\\\)',
         },
 
         BASIC   =>  {
@@ -95,7 +95,7 @@ my $Conf;
         },
         FOXBASE => {
             single      => '(?:\*)|(?:&&)',
-        }    
+        }
     };
 
 
@@ -140,8 +140,7 @@ sub import {
 
             ### otherwise die with an error ###
             } else {
-                use Data::Dumper; print Dumper \%args;
-                die "FOO Requested an unsupported type $args{type} for Acme::Comment\n";
+                die "Requested an unsupported type $args{type} for Acme::Comment\n";
             }
 
         ### otherwise, define a new type for the user ###
@@ -175,6 +174,11 @@ sub import {
 }
 
 sub parse {
+
+    #use Data::Dumper;
+    #print scalar @_;
+    #die Dumper \@_;
+
     my $str = shift;
 
     my $start   = $Conf->{$Type}->{start}     if $Conf->{$Type}->{start};
@@ -217,7 +221,10 @@ sub parse {
 
         ### if there is a single line comment available ##
         if($single) {
-            if( $line =~ m|^\s*$single| ) { next; }
+            if( $line =~ m|^\s*$single| ) {
+    	        push @return, "";
+    	    	next;
+	        }
         }
 
         ### check if we have multiline comment options ###
@@ -226,6 +233,7 @@ sub parse {
             ### and if so, see if they match
             if( $Conf->{$Type}->{one_line} ) {
                 if( $line =~ /$loneline.*?$roneline/) {
+		            push @return, "";
                     next;
                 }
             }
@@ -235,6 +243,7 @@ sub parse {
             if( $line =~ /$ldel/ ) {
                 $lastopen = $i;
                 $counter++;
+		        push @return, "";
                 next;
 
             ### if we find a closing tag, decreate the counter
@@ -244,6 +253,7 @@ sub parse {
                     die "Missing opening comment for closing comment on line $i\n";
                 }
                 $counter--;
+		        push @return, "";
                 next;
             }
         }
@@ -254,7 +264,10 @@ sub parse {
         unless($counter or $line =~ /^\s*$/) {
             push @return, $line ;
             next;
-        }
+        } else {
+		    push @return, "";
+		    next;
+	    }
     }
 
     ### if we have a counter left after parsing all the lines
@@ -269,7 +282,7 @@ sub parse {
 
 sub _gimme_conf { return $Conf };
 
-FILTER { parse($_); };
+FILTER_ONLY executable => sub { parse($_); };
 
 
 1;
