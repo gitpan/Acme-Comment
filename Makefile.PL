@@ -2,8 +2,6 @@ use strict;
 use Cwd;
 use File::Spec;
 
-
-
 ### Comment configuration ###
 my $Conf = {
         C   => {
@@ -46,7 +44,7 @@ my $Conf = {
             single      => '\/\/',
         },
         #BLUE   =>  {
-        #    single      => '(?:==)|(?--)',
+        #    single      => '(?:==)|(?:--)',
         #},
         #INTERCAL    => {
         #    single  => '(?:\(\d+\)\s*)?DO NOTE THAT',
@@ -69,7 +67,9 @@ my $Conf = {
         LATEX  => {
             single      => "%",
         },
-
+        FOXBASE => {
+            single      => '(?:\*)|(?:&&)',
+        }     
 };
 ### the comment styles for ADA and Basic are the same ###
 for my $type(qw|ADA|)                               { $Conf->{$type} = $Conf->{'BASIC'} }
@@ -130,12 +130,17 @@ for my $type (keys %$Conf) {
 
             ### perl get's confused if we type 'use' like this, so we put it in a var.
             my $u = 'use';
+            
+            ### the dir to include to find our latest Acme::Comment ###
+            my $dir = File::Spec->catdir( cwd, 'lib' );
 
             print $fh <<HERE;
+BEGIN { unshift \@INC, '$dir'; }
+
 $u strict;
 $u Test::More q[no_plan];
 
-$u Acme::Comment type => "$type", one_line => $test->{one_line}, own_line => $test->{own_line};
+$u Acme::Comment 1.01 type => "$type", one_line => $test->{one_line}, own_line => $test->{own_line};
 
 
 HERE
@@ -319,5 +324,6 @@ WriteMakefile(
 	
 	PREREQ_PM		=> {
 		'Filter::Simple'    => 0,
+		'Test::More'        => 0,
 	},
 );

@@ -5,7 +5,7 @@ use Filter::Simple;
 
 BEGIN {
     use vars qw($VERSION);
-    $VERSION    =   '1.00';
+    $VERSION    =   '1.01';
 }
 
 my $TypeCount = 0;
@@ -59,7 +59,7 @@ my $Conf;
             start       => quotemeta '!\\',
             end         => quotemeta '\!',
             one_line    => 0,
-            #single      => quotemeta '!', # conflicts =/
+            single      => '!(?!\\\\)', 
         },
 
         BASIC   =>  {
@@ -69,7 +69,7 @@ my $Conf;
             single      => quotemeta '\/\/',
         },
         BLUE   =>  {
-            single      => '(?:==)|(?--)',
+            single      => '(?:==)|(?:--)',
         },
 
         INTERCAL    => {
@@ -93,6 +93,9 @@ my $Conf;
         LATEX  => {
             single      => quotemeta "%",
         },
+        FOXBASE => {
+            single      => '(?:\*)|(?:&&)',
+        }    
     };
 
 
@@ -137,7 +140,8 @@ sub import {
 
             ### otherwise die with an error ###
             } else {
-                die "Requested an unsupported type $args{type} for C::Comment\n";
+                use Data::Dumper; print Dumper \%args;
+                die "FOO Requested an unsupported type $args{type} for Acme::Comment\n";
             }
 
         ### otherwise, define a new type for the user ###
@@ -151,9 +155,9 @@ sub import {
                     die "Start and end tags must be different!\n";
                 }
 
-                $Conf->{$TypeCount}->{start}    = $args{start}  if defined $args{start};
-                $Conf->{$TypeCount}->{end}      = $args{end}    if defined $args{end};
-                $Conf->{$TypeCount}->{single}   = $args{single} if defined $args{single}
+                $Conf->{$TypeCount}->{start}    = quotemeta($args{start})  if defined $args{start};
+                $Conf->{$TypeCount}->{end}      = quotemeta($args{end})    if defined $args{end};
+                $Conf->{$TypeCount}->{single}   = quotemeta($args{single}) if defined $args{single}
             }
 
             $Conf->{$TypeCount}->{own_line} = defined $args{own_line}
@@ -565,6 +569,10 @@ know of.
 
 This module by
 Jos Boumans E<lt>kane@cpan.orgE<gt>.
+
+=head1 Acknowledgements
+
+Thanks to Abigail and Glenn Maciag for their suggestions.
 
 =head1 COPYRIGHT
 

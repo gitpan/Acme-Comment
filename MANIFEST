@@ -1,0 +1,5 @@
+lib/Acme/Comment.pm
+t/.exists
+MANIFEST
+README
+Makefile.PL
