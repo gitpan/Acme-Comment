@@ -158,7 +158,7 @@ HERE
                     ### ALGOL has ; to end it's comments
                     ### so you can't use it with own_line
                     if( $type eq 'ALGOL' ) {
-                        print $fh "SKIP:{skip(q[You can not use 'own_line' with ALGOL],3)}";
+                        print $fh "SKIP:{skip(q[You cannot use 'own_line' with ALGOL],3)}";
                         last START_END;
                     }
 
@@ -298,23 +298,6 @@ HERE
 
 }
 
-### hey, dont ask me, SCHWERN wrote this
-### but it lets us execute all the test files without complaint =)
-{   package MY;
-    sub test_via_harness {
-        my($self, $perl, $tests) = @_;
-        if( $^O eq 'MSWin32' ) {
-            return sprintf <<'MAKE_FRAG', $perl
-    %s -I$(PERL_ARCHLIB) -I$(PERL_LIB) -e "use Test::Harness qw(runtests $$verbose); $$verbose=$(TEST_VERBOSE); runtests glob shift" t\*.t
-MAKE_FRAG
-        } else {
-            return $self->SUPER::test_via_harness($perl, $tests);
-        }
-    }
-}
-
-
-
 ### write the Makefile ###
 use ExtUtils::MakeMaker;
 
@@ -325,5 +308,6 @@ WriteMakefile(
 	PREREQ_PM		=> {
 		'Filter::Simple'    => 0,
 		'Test::More'        => 0,
+    'Text::Balanced'    => 1.99,
 	},
 );
